@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
-public class AddNewToDo extends AppCompatActivity {
+public class CreateNewToDo extends AppCompatActivity {
 
     private Button save;
     private TextView todoDate;
@@ -47,12 +47,12 @@ public class AddNewToDo extends AppCompatActivity {
                     date = todoDate.getText().toString();
                     description = todoDescription.getText().toString();
 
-                    if(!date.matches("") && !description.matches("")) {
+                    if (!date.matches("Select date") && !description.matches("")) {
                         boolean insert = dc.insert(date, description);
-                    }else {
+                        startActivity(new Intent(CreateNewToDo.this, MainActivity.class));
+                    } else {
                         Toast.makeText(getApplicationContext(), "Please fill the fields", Toast.LENGTH_LONG).show();
                     }
-                    startActivity(new Intent(AddNewToDo.this, MainActivity.class));
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -71,7 +71,7 @@ public class AddNewToDo extends AppCompatActivity {
                 int day = cal.get(Calendar.DAY_OF_MONTH);
 
                 DatePickerDialog datePickerDialog = new DatePickerDialog(
-                        AddNewToDo.this, android.R.style.Theme_Holo_Light_Dialog_MinWidth, datePick, year, month, day);
+                        CreateNewToDo.this, android.R.style.Theme_Holo_Light_Dialog_MinWidth, datePick, year, month, day);
 
                 datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 datePickerDialog.show();

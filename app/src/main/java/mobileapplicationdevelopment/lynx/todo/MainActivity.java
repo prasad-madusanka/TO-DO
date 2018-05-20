@@ -1,83 +1,94 @@
 package mobileapplicationdevelopment.lynx.todo;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ListView lvTodos;
-    private FloatingActionButton fabAddTodo;
-    private DatabaseConnection dc;
-    private ArrayAdapter<String> arrayAdapter;
+    ListView todoListView;
+    FloatingActionButton fabAdd;
+    DatabaseConnection db;
+    RecycleViewAdapter recycleViewAdapter;
+    List<GettersSetters> list;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        try{
-            init();
-            dc =  new DatabaseConnection(getApplicationContext());
-            feedListView();
-        }catch (Exception ex){
+        try {
 
+            init();
+            readTodoS();
+            Toast.makeText(getApplicationContext(), "Click and Hold to Delete", Toast.LENGTH_LONG).show();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
-        fabAddTodo.setOnClickListener(new View.OnClickListener() {
+        fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    boolean insert  = dc.addData("88", "AjA");
-                    feedListView();
+                startActivity(new Intent(MainActivity.this, CreateNewToDo.class));
+            }
+        });
 
-                    if (insert) {
-                        toast("Complete");
+        todoListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                    } else {
-                        toast("Wrong");
-                    }
+                try {
 
-                }catch (Exception ex){
+                    db.delete(view.getId());
+                    list.remove(position);
+                    ((BaseAdapter) recycleViewAdapter).notifyDataSetChanged();
 
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
+
+                return false;
             }
         });
 
 
     }
 
-    private void init(){
-        fabAddTodo = (FloatingActionButton)findViewById(R.id.fabAddTodo);
-        lvTodos = (ListView) findViewById(R.id.lvTodos);
+    private void init() {
+
+        db = new DatabaseConnection(getApplicationContext());
+
+        fabAdd = (FloatingActionButton) findViewById(R.id.fabAddTodo);
+        todoListView = (ListView) findViewById(R.id.lvTodos);
     }
 
+    protected void readTodoS() throws Exception {
 
-    private void toast(String ms){
-        Toast.makeText(getApplicationContext(), ms, Toast.LENGTH_LONG).show();
-    }
+        list = new ArrayList<>();
 
-    private void feedListView()throws Exception{
-        Cursor cur  = dc.readData();
-        cur.moveToFirst();
-        ArrayList<String> aList = new ArrayList<String>();
-        if (cur != null) {
+        Cursor data = db.read();
+        data.moveToFirst();
+
+        if (data != null) {
             do {
-                String description = cur.getString(1);
+                list.add(new GettersSetters(data.getInt(0), data.getString(1), data.getString(2)));
+            } while (data.moveToNext());
 
-                aList.add(description);
-            } while (cur.moveToNext());
+            recycleViewAdapter = new RecycleViewAdapter(this, list);
+            todoListView.setAdapter(recycleViewAdapter);
         }
-        arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, aList);
-        lvTodos.setAdapter(arrayAdapter);
-
     }
+
 }
