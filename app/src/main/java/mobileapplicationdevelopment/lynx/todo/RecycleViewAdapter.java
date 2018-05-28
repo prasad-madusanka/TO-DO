@@ -38,7 +38,6 @@ public class RecycleViewAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         View view = View.inflate(context, R.layout.activity_custom_list_items, null);
-        ;
 
         TextView date = view.findViewById(R.id.txtDate);
         TextView description = view.findViewById(R.id.txtDescription);
